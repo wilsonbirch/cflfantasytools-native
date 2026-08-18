@@ -1,0 +1,15 @@
+// Jest config for the Expo app. `jest-expo` wires up the Babel transform
+// (babel-preset-expo handles TS/JSX) and a sensible transformIgnorePatterns
+// for the RN/Expo runtime. We extend that list with the ESM-shipped packages
+// our app pulls in (@apollo/client, graphql) so they get transpiled too.
+module.exports = {
+    preset: 'jest-expo',
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+    moduleNameMapper: {
+        // Metro understands CSS; Jest does not. Stub it (side-effect-only imports).
+        '\\.css$': '<rootDir>/jest/style-mock.js',
+    },
+    transformIgnorePatterns: [
+        'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@apollo/.*|graphql))',
+    ],
+}

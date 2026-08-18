@@ -1,0 +1,27 @@
+{
+    "expo": {
+        "name": "3 Down Fantasy",
+        "slug": "cflfantasytools",
+        "version": "0.1.0",
+        "orientation": "portrait",
+        "scheme": "cflfantasytools",
+        "userInterfaceStyle": "dark",
+        "newArchEnabled": true,
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "ca.cflfantasytools.app"
+        },
+        "android": {
+            "package": "ca.cflfantasytools.app",
+            "edgeToEdgeEnabled": true
+        },
+        "web": {
+            "bundler": "metro",
+            "output": "static"
+        },
+        "plugins": ["expo-router", "expo-secure-store"],
+        "experiments": {
+            "typedRoutes": true
+        }
+    }
+}
