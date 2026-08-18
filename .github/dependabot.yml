@@ -1,0 +1,88 @@
+version: 2
+updates:
+    - package-ecosystem: 'npm'
+      directory: '/'
+      schedule:
+          interval: 'weekly'
+      open-pull-requests-limit: 10
+      groups:
+          # Coupled stacks come FIRST — a group earlier in this list wins the
+          # package, and minor-and-patch below would otherwise claim their
+          # minor/patch bumps and split the stack across PRs.
+          react:
+              patterns:
+                  - 'react'
+                  - 'react-dom'
+                  - 'react-test-renderer'
+                  - '@types/react'
+              update-types:
+                  - 'major'
+                  - 'minor'
+                  - 'patch'
+          # @apollo/client is typed against the artifacts codegen emits, and the
+          # CLI and preset emit them together.
+          graphql:
+              patterns:
+                  - 'graphql'
+                  - '@apollo/client'
+                  - '@graphql-codegen/*'
+              update-types:
+                  - 'major'
+                  - 'minor'
+                  - 'patch'
+          minor-and-patch:
+              update-types:
+                  - 'minor'
+                  - 'patch'
+          # Advisory-driven PRs bypass every version-update group above unless a
+          # group opts in with applies-to. Without this, one advisory wave
+          # arrives as N solo PRs, each needing its own branch update and CI run.
+          security:
+              applies-to: security-updates
+              patterns:
+                  - '*'
+      ignore:
+          # THE EXPO SDK PINS THESE — DO NOT LET DEPENDABOT MOVE THEM.
+          #
+          # An Expo SDK release fixes an exact compatible version for every
+          # expo-* module, react-native, the react-native-* packages Expo
+          # vendors, and jest-expo. `npx expo install --check` is the authority,
+          # and it will report a package as wrong even when npm considers the
+          # range satisfied. A dependabot bump of any one of them produces a
+          # tree that installs cleanly and then fails at build or at runtime on
+          # a native module mismatch — which CI here cannot catch, since it runs
+          # lint/typecheck/test and never builds a native binary.
+          #
+          # Upgrade path is the SDK, not the package: `npx expo install --fix`
+          # after bumping the `expo` major, as one deliberate change.
+          #
+          # This is a wholesale ignore, not a major-only one: patch bumps are
+          # just as capable of breaking SDK alignment.
+          - dependency-name: 'expo'
+          - dependency-name: 'expo-*'
+          - dependency-name: 'react-native'
+          - dependency-name: 'react-native-*'
+          - dependency-name: 'jest-expo'
+          - dependency-name: 'eslint-config-expo'
+          # react and react-dom are likewise chosen by the SDK — React Native
+          # ships against one React version per release. Kept in the react group
+          # above so that when the SDK does move them, they move together.
+          - dependency-name: 'react'
+            update-types: ['version-update:semver-major']
+          - dependency-name: 'react-dom'
+            update-types: ['version-update:semver-major']
+          # typescript 7 is the native compiler rewrite and the RN/Expo
+          # toolchain has not caught up. Hold the major.
+          - dependency-name: 'typescript'
+            update-types: ['version-update:semver-major']
+
+    - package-ecosystem: 'github-actions'
+      directory: '/'
+      schedule:
+          interval: 'weekly'
+      open-pull-requests-limit: 5
+      groups:
+          actions-minor-and-patch:
+              update-types:
+                  - 'minor'
+                  - 'patch'
