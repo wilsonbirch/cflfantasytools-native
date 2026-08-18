@@ -64,12 +64,52 @@ updates:
           - dependency-name: 'react-native-*'
           - dependency-name: 'jest-expo'
           - dependency-name: 'eslint-config-expo'
-          # react and react-dom are likewise chosen by the SDK — React Native
-          # ships against one React version per release. Kept in the react group
-          # above so that when the SDK does move them, they move together.
+          # react, react-dom and react-test-renderer are chosen by the SDK.
+          # WHOLESALE, not major-only — the major-only rule this replaces was
+          # not enough. Dependabot proposed the 19.2.3 -> 19.2.8 PATCH and
+          # `npx expo install --check` immediately demanded 19.2.3 back:
+          # expo/bundledNativeModules.json pins it exactly. jest-expo depends
+          # on react-test-renderer at exactly 19.2.3 too, so a hoisted 19.2.8
+          # leaves two renderers in the tree against one react — the
+          # "Incompatible React versions" failure. All three CI jobs passed on
+          # that PR, because there are no component tests to catch it.
+          # Kept in the react group above so they move together when the SDK
+          # does move them.
           - dependency-name: 'react'
-            update-types: ['version-update:semver-major']
           - dependency-name: 'react-dom'
+          - dependency-name: 'react-test-renderer'
+          # jest is SDK-pinned, and jest-expo hides it well: it declares NO
+          # `jest` peer at all, merely depending on jest 29 internals
+          # (babel-jest ^29.2.1, @jest/globals ^29.2.1, jest-snapshot ^29.2.1,
+          # jest-environment-jsdom ^29.2.1). With nothing to conflict, `npm ci`
+          # installs a jest 30 bump cleanly and the runner then dies on the
+          # first suite with "this._moduleMocker.clearMocksOnScope is not a
+          # function" — jest-runtime 30 holding jest-mock 29's module mocker.
+          - dependency-name: 'jest'
+          - dependency-name: '@types/jest'
+          # @babel/runtime is pinned by babel-preset-expo as an OPTIONAL peer
+          # at ^7.20.0 — optional, so npm accepts an ^8 bump without a murmur.
+          # expo, react-native-web and metro-runtime all want ^7 as well, so
+          # bumping the app does not move the SDK: npm just nests four more
+          # copies of 7.x and the bundle carries two majors of the helper
+          # runtime. It buys nothing either, since babel-preset-expo reads
+          # `require('@babel/runtime/package.json').version` from its own
+          # nested 7.x when choosing the transform-runtime target. Babel 8
+          # also drops ./helpers/esm/* (120 exports -> 0) and ./regenerator
+          # from its exports map. `expo install --check` is SILENT on this one,
+          # because the pin lives in a peer range — which is exactly why it
+          # needs a rule here.
+          - dependency-name: '@babel/runtime'
+            update-types: ['version-update:semver-major']
+          # eslint majors are gated on eslint-config-expo, SDK-pinned above.
+          # It bundles eslint-plugin-react, whose NEWEST release (7.37.5, the
+          # one installed) peer-caps at eslint ^9.7 and still calls the
+          # context.getFilename() that eslint 10 removed — `npm run lint` dies
+          # loading 'react/display-name'. Nested under eslint-config-expo, so
+          # an overrides entry has nothing to point at. Unblocks with the SDK.
+          # NOTE: the same eslint 10 bump is SAFE in cflfantasytools-api. The
+          # blocker is this repo's plugin set, not eslint itself.
+          - dependency-name: 'eslint'
             update-types: ['version-update:semver-major']
           # typescript 7 is the native compiler rewrite and the RN/Expo
           # toolchain has not caught up. Hold the major.
@@ -82,7 +122,20 @@ updates:
           interval: 'weekly'
       open-pull-requests-limit: 5
       groups:
-          actions-minor-and-patch:
+          # One group across every update-type, majors included — the actions
+          # share the same step lists, so solo major PRs conflict textually and
+          # the second to merge needs `@dependabot recreate` rather than a
+          # rebase. These are first-party GitHub actions whose diffs are one
+          # `uses:` line each, so the npm case for reviewing majors solo does
+          # not transfer.
+          actions:
+              patterns:
+                  - '*'
               update-types:
+                  - 'major'
                   - 'minor'
                   - 'patch'
+          security:
+              applies-to: security-updates
+              patterns:
+                  - '*'
