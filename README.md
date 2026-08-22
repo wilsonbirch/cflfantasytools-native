@@ -33,10 +33,14 @@ The access token is short-lived and stays **in memory only** — it is never
 persisted. `src/lib/tokenStore.ts` owns both, and its tests assert that the
 access token never reaches storage.
 
-Refresh-on-401 lands in phase 2, alongside the api's `refresh` mutation.
+`src/lib/session.ts` refreshes it — ahead of expiry and on `UNAUTHENTICATED`,
+single-flight because refresh tokens are one-time use. A failed refresh clears
+both tokens and routes to the login screen.
 
 ## Schema contract
 
 `schema.graphql` is a committed snapshot of the api's SDL. Refresh it with
-`npm run schema:pull` against a running api, then re-run `npm run codegen`.
-The api owns the schema, so changes ship as a stacked PR set with api first.
+`npm run schema:pull` against a running api (or copy the contract from
+`docs/contracts/` in the parent repo), then re-run `npm run codegen` and commit
+`src/generated` — CI fails on drift. The api owns the schema, so changes ship
+as a stacked PR set with api first.

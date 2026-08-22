@@ -32,10 +32,9 @@ jobs:
                   cache: npm
             - run: npm ci
             - run: npm run typecheck
-            # TODO(phase 5): add the codegen drift gate once real GraphQL
-            # documents exist:
-            #   - run: npm run codegen
-            #   - run: git diff --exit-code src/generated
+            # Generated types are committed; fail if the snapshot or documents drifted.
+            - run: npm run codegen
+            - run: git diff --exit-code src/generated
 
     test:
         runs-on: ubuntu-latest

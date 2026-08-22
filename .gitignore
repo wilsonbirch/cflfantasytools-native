@@ -2,7 +2,6 @@ node_modules
 .expo
 dist
 web-build
-src/generated
 *.log
 .env
 .env.*
