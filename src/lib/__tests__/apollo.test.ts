@@ -12,7 +12,7 @@ jest.mock('expo-secure-store', () => ({
 jest.mock('../session', () => ({ apiUrl: 'http://api.test/graphql', refreshSession: jest.fn() }))
 
 const QUERY = gql`
-    query Me {
+    query LinkProbe {
         me {
             id
         }

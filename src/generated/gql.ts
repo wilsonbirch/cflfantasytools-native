@@ -18,6 +18,7 @@ type Documents = {
     "\n    mutation Logout($refreshToken: String!) {\n        logout(refreshToken: $refreshToken)\n    }\n": typeof types.LogoutDocument,
     "\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.LoginDocument,
     "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.RegisterDocument,
+    "\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n": typeof types.LinkProbeDocument,
     "\n    mutation Refresh($refreshToken: String!) {\n        refresh(refreshToken: $refreshToken) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.RefreshDocument,
 };
 const documents: Documents = {
@@ -25,6 +26,7 @@ const documents: Documents = {
     "\n    mutation Logout($refreshToken: String!) {\n        logout(refreshToken: $refreshToken)\n    }\n": types.LogoutDocument,
     "\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.LoginDocument,
     "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.RegisterDocument,
+    "\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n": types.LinkProbeDocument,
     "\n    mutation Refresh($refreshToken: String!) {\n        refresh(refreshToken: $refreshToken) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.RefreshDocument,
 };
 
@@ -58,6 +60,10 @@ export function graphql(source: "\n    mutation Login($email: String!, $password
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"): (typeof documents)["\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n"): (typeof documents)["\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
