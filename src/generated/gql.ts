@@ -16,16 +16,28 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
 type Documents = {
     "\n    query Me {\n        me {\n            id\n            email\n            role\n        }\n    }\n": typeof types.MeDocument,
     "\n    mutation Logout($refreshToken: String!) {\n        logout(refreshToken: $refreshToken)\n    }\n": typeof types.LogoutDocument,
+    "\n    query Teams {\n        teams {\n            id\n            slug\n            name\n            city\n            abbreviation\n            isActive\n        }\n    }\n": typeof types.TeamsDocument,
     "\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.LoginDocument,
     "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.RegisterDocument,
+    "\n    query Team($slug: String!) {\n        team(slug: $slug) {\n            id\n            name\n        }\n        depthChartYears(teamSlug: $slug)\n    }\n": typeof types.TeamDocument,
+    "\n    query DepthChartLists($slug: String!, $year: Int!) {\n        depthChartLists(teamSlug: $slug, year: $year) {\n            id\n            year\n            charts {\n                id\n                title\n                week\n                season\n                publishedAt\n                url\n            }\n        }\n    }\n": typeof types.DepthChartListsDocument,
+    "\n    query MySubscriptions {\n        mySubscriptions {\n            id\n            enabled\n            team {\n                id\n                slug\n            }\n        }\n    }\n": typeof types.MySubscriptionsDocument,
+    "\n    mutation Subscribe($teamSlug: String!) {\n        subscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n": typeof types.SubscribeDocument,
+    "\n    mutation Unsubscribe($teamSlug: String!) {\n        unsubscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n": typeof types.UnsubscribeDocument,
     "\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n": typeof types.LinkProbeDocument,
     "\n    mutation Refresh($refreshToken: String!) {\n        refresh(refreshToken: $refreshToken) {\n            accessToken\n            refreshToken\n        }\n    }\n": typeof types.RefreshDocument,
 };
 const documents: Documents = {
     "\n    query Me {\n        me {\n            id\n            email\n            role\n        }\n    }\n": types.MeDocument,
     "\n    mutation Logout($refreshToken: String!) {\n        logout(refreshToken: $refreshToken)\n    }\n": types.LogoutDocument,
+    "\n    query Teams {\n        teams {\n            id\n            slug\n            name\n            city\n            abbreviation\n            isActive\n        }\n    }\n": types.TeamsDocument,
     "\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.LoginDocument,
     "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.RegisterDocument,
+    "\n    query Team($slug: String!) {\n        team(slug: $slug) {\n            id\n            name\n        }\n        depthChartYears(teamSlug: $slug)\n    }\n": types.TeamDocument,
+    "\n    query DepthChartLists($slug: String!, $year: Int!) {\n        depthChartLists(teamSlug: $slug, year: $year) {\n            id\n            year\n            charts {\n                id\n                title\n                week\n                season\n                publishedAt\n                url\n            }\n        }\n    }\n": types.DepthChartListsDocument,
+    "\n    query MySubscriptions {\n        mySubscriptions {\n            id\n            enabled\n            team {\n                id\n                slug\n            }\n        }\n    }\n": types.MySubscriptionsDocument,
+    "\n    mutation Subscribe($teamSlug: String!) {\n        subscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n": types.SubscribeDocument,
+    "\n    mutation Unsubscribe($teamSlug: String!) {\n        unsubscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n": types.UnsubscribeDocument,
     "\n    query LinkProbe {\n        me {\n            id\n        }\n    }\n": types.LinkProbeDocument,
     "\n    mutation Refresh($refreshToken: String!) {\n        refresh(refreshToken: $refreshToken) {\n            accessToken\n            refreshToken\n        }\n    }\n": types.RefreshDocument,
 };
@@ -55,11 +67,35 @@ export function graphql(source: "\n    mutation Logout($refreshToken: String!) {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    query Teams {\n        teams {\n            id\n            slug\n            name\n            city\n            abbreviation\n            isActive\n        }\n    }\n"): (typeof documents)["\n    query Teams {\n        teams {\n            id\n            slug\n            name\n            city\n            abbreviation\n            isActive\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"): (typeof documents)["\n    mutation Login($email: String!, $password: String!) {\n        login(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"): (typeof documents)["\n    mutation Register($email: String!, $password: String!) {\n        register(email: $email, password: $password) {\n            accessToken\n            refreshToken\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query Team($slug: String!) {\n        team(slug: $slug) {\n            id\n            name\n        }\n        depthChartYears(teamSlug: $slug)\n    }\n"): (typeof documents)["\n    query Team($slug: String!) {\n        team(slug: $slug) {\n            id\n            name\n        }\n        depthChartYears(teamSlug: $slug)\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query DepthChartLists($slug: String!, $year: Int!) {\n        depthChartLists(teamSlug: $slug, year: $year) {\n            id\n            year\n            charts {\n                id\n                title\n                week\n                season\n                publishedAt\n                url\n            }\n        }\n    }\n"): (typeof documents)["\n    query DepthChartLists($slug: String!, $year: Int!) {\n        depthChartLists(teamSlug: $slug, year: $year) {\n            id\n            year\n            charts {\n                id\n                title\n                week\n                season\n                publishedAt\n                url\n            }\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query MySubscriptions {\n        mySubscriptions {\n            id\n            enabled\n            team {\n                id\n                slug\n            }\n        }\n    }\n"): (typeof documents)["\n    query MySubscriptions {\n        mySubscriptions {\n            id\n            enabled\n            team {\n                id\n                slug\n            }\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation Subscribe($teamSlug: String!) {\n        subscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n"): (typeof documents)["\n    mutation Subscribe($teamSlug: String!) {\n        subscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation Unsubscribe($teamSlug: String!) {\n        unsubscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n"): (typeof documents)["\n    mutation Unsubscribe($teamSlug: String!) {\n        unsubscribe(teamSlug: $teamSlug) {\n            id\n            enabled\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
