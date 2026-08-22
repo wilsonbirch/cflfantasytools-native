@@ -37,33 +37,38 @@ export default function Account() {
 
     if (loading) return <ActivityIndicator style={ui.center} />
 
-    if (!data?.me) {
-        return (
-            <View style={ui.center}>
-                <Text style={ui.text}>Sign in to subscribe to depth-chart alerts.</Text>
-                <Link href="/login" style={ui.link} accessibilityRole="link">
-                    Sign in
-                </Link>
-                <Link href="/register" style={ui.link} accessibilityRole="link">
-                    Create account
+    return (
+        <View style={ui.screen}>
+            {data?.me ? (
+                <View style={ui.content}>
+                    <Text style={ui.title}>{data.me.email}</Text>
+                    <Text style={ui.muted}>{data.me.role === 'ADMIN' ? 'Admin' : 'Member'}</Text>
+                    <Pressable
+                        style={ui.button}
+                        onPress={signOut}
+                        disabled={signingOut}
+                        accessibilityRole="button"
+                        accessibilityLabel="Sign out"
+                    >
+                        <Text style={ui.buttonText}>Sign out</Text>
+                    </Pressable>
+                </View>
+            ) : (
+                <View style={ui.content}>
+                    <Text style={ui.text}>Sign in to subscribe to depth-chart alerts.</Text>
+                    <Link href="/login" style={ui.link} accessibilityRole="link">
+                        Sign in
+                    </Link>
+                    <Link href="/register" style={ui.link} accessibilityRole="link">
+                        Create account
+                    </Link>
+                </View>
+            )}
+            <View style={ui.content}>
+                <Link href="/status" style={ui.link} accessibilityRole="link">
+                    Data status
                 </Link>
             </View>
-        )
-    }
-
-    return (
-        <View style={ui.content}>
-            <Text style={ui.title}>{data.me.email}</Text>
-            <Text style={ui.muted}>{data.me.role === 'ADMIN' ? 'Admin' : 'Member'}</Text>
-            <Pressable
-                style={ui.button}
-                onPress={signOut}
-                disabled={signingOut}
-                accessibilityRole="button"
-                accessibilityLabel="Sign out"
-            >
-                <Text style={ui.buttonText}>Sign out</Text>
-            </Pressable>
         </View>
     )
 }
