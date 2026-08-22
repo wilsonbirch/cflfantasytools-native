@@ -45,3 +45,6 @@ export const ui = StyleSheet.create({
     buttonText: { color: colors.text, fontWeight: '600', fontSize: 16 },
     link: { color: colors.accent, fontSize: 15 },
 })
+
+export const fmtDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })
