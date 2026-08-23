@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/client/testing/react'
-import { render, screen } from '@testing-library/react-native'
+import { render, screen, within } from '@testing-library/react-native'
 import TeamScreen from '../team/[slug]'
 import { DepthChartListsDocument, MeDocument, TeamDocument } from '~/generated/graphql'
 
@@ -35,6 +35,28 @@ const mocks = [
         request: { query: DepthChartListsDocument, variables: { slug: 'ott', year: 2026 } },
         result: {
             data: {
+                team: {
+                    __typename: 'Team',
+                    id: 1,
+                    coachingStaff: [
+                        {
+                            __typename: 'CoachingStaff',
+                            id: 5,
+                            role: 'OC',
+                            person: 'T. Dinwiddie',
+                            effectiveFrom: '2026-01-15T12:00:00Z',
+                            effectiveTo: null,
+                        },
+                        {
+                            __typename: 'CoachingStaff',
+                            id: 4,
+                            role: 'HC',
+                            person: 'B. Dickenson',
+                            effectiveFrom: '2025-01-10T12:00:00Z',
+                            effectiveTo: null,
+                        },
+                    ],
+                },
                 depthChartLists: [
                     {
                         __typename: 'DepthChartList',
@@ -73,4 +95,18 @@ it('lists archived copies per chart and flags a replaced PDF', async () => {
     expect(screen.getByText(/replaced at same URL/)).toBeTruthy()
     expect(screen.getByLabelText('Open archived copy from Jul 2, 2026')).toBeTruthy()
     expect(screen.getByText('1 KB')).toBeTruthy()
+})
+
+it('lists the season coaching staff HC first', async () => {
+    await render(
+        <MockedProvider mocks={mocks}>
+            <TeamScreen />
+        </MockedProvider>,
+    )
+    const list = await screen.findByLabelText('Coaching staff', {}, { timeout: 5000 })
+    const names = within(list).getAllByText(/^(HC|OC|DC) /)
+    expect(names.map((n) => n.props.children.join(''))).toEqual([
+        'HC B. Dickenson',
+        'OC T. Dinwiddie',
+    ])
 })

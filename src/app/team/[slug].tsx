@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native'
 import SubscribeToggle from '~/components/SubscribeToggle'
 import { graphql } from '~/generated'
+import type { DepthChartListsQuery } from '~/generated/graphql'
 import { colors, fmtDate, ui } from '~/lib/ui'
 
 const TEAM = graphql(`
@@ -19,6 +20,16 @@ const TEAM = graphql(`
 
 const CHARTS = graphql(`
     query DepthChartLists($slug: String!, $year: Int!) {
+        team(slug: $slug) {
+            id
+            coachingStaff(year: $year) {
+                id
+                role
+                person
+                effectiveFrom
+                effectiveTo
+            }
+        }
         depthChartLists(teamSlug: $slug, year: $year) {
             id
             year
@@ -83,6 +94,7 @@ export default function TeamScreen() {
                 <FlatList
                     data={charts.data?.depthChartLists.flatMap((l) => l.charts)}
                     keyExtractor={(c) => String(c.id)}
+                    ListHeaderComponent={<Staff staff={charts.data?.team?.coachingStaff ?? []} />}
                     ListEmptyComponent={<Text style={[ui.muted, ui.content]}>No charts yet.</Text>}
                     renderItem={({ item }) => (
                         <View>
@@ -119,6 +131,31 @@ export default function TeamScreen() {
                     )}
                 />
             )}
+        </View>
+    )
+}
+
+const ROLES = ['HC', 'OC', 'DC'] as const
+
+// HC/OC/DC in post at any point in the selected season; a mid-season change
+// shows both people with their dates.
+function Staff({ staff }: { staff: NonNullable<DepthChartListsQuery['team']>['coachingStaff'] }) {
+    if (staff.length === 0) return null
+    const rows = ROLES.flatMap((role) => staff.filter((c) => c.role === role))
+    return (
+        <View accessibilityRole="list" accessibilityLabel="Coaching staff">
+            <Text style={[ui.title, ui.content]}>Coaching staff</Text>
+            {rows.map((c) => (
+                <View key={c.id} style={ui.row}>
+                    <Text style={ui.text}>
+                        {c.role} {c.person}
+                    </Text>
+                    <Text style={ui.muted}>
+                        {fmtDate(c.effectiveFrom)} –{' '}
+                        {c.effectiveTo ? fmtDate(c.effectiveTo) : 'now'}
+                    </Text>
+                </View>
+            ))}
         </View>
     )
 }
