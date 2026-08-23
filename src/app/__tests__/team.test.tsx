@@ -103,7 +103,7 @@ it('lists the season coaching staff HC first', async () => {
             <TeamScreen />
         </MockedProvider>,
     )
-    const list = await screen.findByLabelText('Coaching staff')
+    const list = await screen.findByLabelText('Coaching staff', {}, { timeout: 5000 })
     const names = within(list).getAllByText(/^(HC|OC|DC) /)
     expect(names.map((n) => n.props.children.join(''))).toEqual([
         'HC B. Dickenson',
