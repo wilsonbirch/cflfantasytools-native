@@ -10,6 +10,7 @@ const ALIGNMENT = graphql(`
     query TeamAlignment($slug: String!, $year: Int!, $week: Int) {
         teamAlignment(teamSlug: $slug, year: $year, week: $week) {
             week
+            weeks
             chart {
                 id
                 title
@@ -20,14 +21,6 @@ const ALIGNMENT = graphql(`
                 depth
                 jersey
                 player
-            }
-        }
-        depthChartLists(teamSlug: $slug, year: $year) {
-            id
-            charts {
-                id
-                week
-                parseStatus
             }
         }
     }
@@ -47,15 +40,8 @@ export default function AlignmentScreen() {
     const { data, loading } = useQuery(ALIGNMENT, {
         variables: { slug: params.slug, year, week },
     })
-    const weeks = [
-        ...new Set(
-            data?.depthChartLists
-                .flatMap((l) => l.charts)
-                .filter((c) => c.parseStatus === 'OK')
-                .map((c) => c.week),
-        ),
-    ].sort((a, b) => a - b)
     const ta = data?.teamAlignment
+    const weeks = ta?.weeks ?? []
     const positions = [...new Set(ta?.positions.map((p) => p.position))].sort(byPosition)
 
     return (

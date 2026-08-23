@@ -19,6 +19,7 @@ export default function RootLayout() {
                 <Stack.Screen name="team/[slug]" options={{ title: 'Team' }} />
                 <Stack.Screen name="game/[id]" options={{ title: 'Game' }} />
                 <Stack.Screen name="alignment/[slug]" options={{ title: 'Receiver alignment' }} />
+                <Stack.Screen name="fantasy/[id]" options={{ title: 'Player' }} />
                 <Stack.Screen name="status" options={{ title: 'Data status' }} />
                 <Stack.Screen name="login" options={{ title: 'Sign in', presentation: 'modal' }} />
                 <Stack.Screen

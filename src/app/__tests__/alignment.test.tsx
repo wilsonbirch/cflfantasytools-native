@@ -27,6 +27,7 @@ const mocks = [
                 teamAlignment: {
                     __typename: 'TeamAlignment',
                     week: 4,
+                    weeks: [3, 4],
                     chart: {
                         __typename: 'DepthChart',
                         id: 10,
@@ -40,17 +41,6 @@ const mocks = [
                         pos('1WK', 1, 'D. Boundary'),
                     ],
                 },
-                depthChartLists: [
-                    {
-                        __typename: 'DepthChartList',
-                        id: 1,
-                        charts: [
-                            { __typename: 'DepthChart', id: 9, week: 3, parseStatus: 'OK' },
-                            { __typename: 'DepthChart', id: 10, week: 4, parseStatus: 'OK' },
-                            { __typename: 'DepthChart', id: 11, week: 5, parseStatus: 'FAILED' },
-                        ],
-                    },
-                ],
             },
         },
     },
