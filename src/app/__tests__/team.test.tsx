@@ -68,7 +68,8 @@ it('lists archived copies per chart and flags a replaced PDF', async () => {
             <TeamScreen />
         </MockedProvider>,
     )
-    expect(await screen.findByLabelText('Open Week 3 vs TOR')).toBeTruthy()
+    // Two queries in sequence (team, then charts); CI runners need more than the 1s default.
+    expect(await screen.findByLabelText('Open Week 3 vs TOR', {}, { timeout: 5000 })).toBeTruthy()
     expect(screen.getByText(/replaced at same URL/)).toBeTruthy()
     expect(screen.getByLabelText('Open archived copy from Jul 2, 2026')).toBeTruthy()
     expect(screen.getByText('1 KB')).toBeTruthy()
