@@ -47,7 +47,7 @@ export default function SeasonFilter({
                 >
                     <Text style={[ui.link, older === undefined && styles.off]}>‹</Text>
                 </Pressable>
-                <Text style={ui.title}>{year ?? '—'}</Text>
+                <Text style={styles.year}>{year ?? '—'}</Text>
                 <Pressable
                     onPress={() => newer !== undefined && onYear(newer)}
                     disabled={newer === undefined}
@@ -77,8 +77,9 @@ export default function SeasonFilter({
 }
 
 const styles = StyleSheet.create({
-    wrap: { padding: 16, gap: 12 },
-    years: { flexDirection: 'row', alignItems: 'center', gap: 24 },
+    wrap: { paddingVertical: 8, gap: 10 },
+    years: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+    year: { fontSize: 17, fontWeight: '600', color: colors.text, fontVariant: ['tabular-nums'] },
     off: { opacity: 0.3 },
     chip: {
         paddingVertical: 6,

@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client/react'
 import { Link } from 'expo-router'
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
+import ScreenHeader from '~/components/ScreenHeader'
+import { ErrorState, Loading } from '~/components/State'
 import { graphql } from '~/generated'
-import { ui } from '~/lib/ui'
+import { accentRow, ui } from '~/lib/ui'
 
 const TEAMS = graphql(`
     query Teams {
@@ -19,25 +21,26 @@ const TEAMS = graphql(`
 
 export default function Teams() {
     const { data, loading, error, refetch } = useQuery(TEAMS)
-    if (loading) return <ActivityIndicator style={ui.center} />
-    if (error)
-        return (
-            <View style={ui.center}>
-                <Text style={ui.error}>Could not load teams.</Text>
-                <Pressable onPress={() => refetch()} accessibilityRole="button">
-                    <Text style={ui.link}>Retry</Text>
-                </Pressable>
-            </View>
-        )
+    const teams = data?.teams.filter((t) => t.isActive) ?? []
     return (
         <FlatList
             style={ui.screen}
-            data={data?.teams.filter((t) => t.isActive)}
+            data={teams}
             keyExtractor={(t) => t.slug}
+            ListHeaderComponent={
+                <ScreenHeader title="Teams" context="Depth charts · alignment · coaching staff" />
+            }
+            ListEmptyComponent={
+                loading ? (
+                    <Loading />
+                ) : error ? (
+                    <ErrorState message="Could not load teams." onRetry={() => refetch()} />
+                ) : null
+            }
             renderItem={({ item }) => (
                 <Link href={`/team/${item.slug}`} asChild>
                     <Pressable
-                        style={ui.row}
+                        style={accentRow(item.slug)}
                         accessibilityRole="button"
                         accessibilityLabel={`${item.name} depth charts`}
                     >

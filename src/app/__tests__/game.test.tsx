@@ -8,7 +8,12 @@ jest.mock('expo-router', () => ({
     Stack: { Screen: () => null },
 }))
 
-const team = (id: number, abbreviation: string) => ({ __typename: 'Team', id, abbreviation })
+const team = (id: number, abbreviation: string) => ({
+    __typename: 'Team',
+    id,
+    abbreviation,
+    slug: abbreviation.toLowerCase(),
+})
 const box = (id: number, abbreviation: string, points: number) => ({
     __typename: 'TeamBoxScore',
     team: team(id, abbreviation),
@@ -86,7 +91,8 @@ it('renders the box score and per-player tables', async () => {
             <GameScreen />
         </MockedProvider>,
     )
-    expect(await screen.findByText('TOR 17 @ OTT 24')).toBeTruthy()
+    expect(await screen.findByLabelText('TOR: 17, away')).toBeTruthy()
+    expect(screen.getByLabelText('OTT: 24, home')).toBeTruthy()
     expect(screen.getByText('20/30')).toBeTruthy() // passing C/A
     expect(screen.getByText('90')).toBeTruthy() // receiving yards
     expect(screen.getByText('2WK')).toBeTruthy() // receiver alignment

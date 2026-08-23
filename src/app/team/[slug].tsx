@@ -2,11 +2,12 @@ import { useQuery } from '@apollo/client/react'
 import { Link, Stack, useLocalSearchParams } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { useState } from 'react'
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native'
+import { FlatList, Pressable, ScrollView, Text, View } from 'react-native'
+import { Empty, Loading } from '~/components/State'
 import SubscribeToggle from '~/components/SubscribeToggle'
 import { graphql } from '~/generated'
 import type { DepthChartListsQuery } from '~/generated/graphql'
-import { colors, fmtDate, ui } from '~/lib/ui'
+import { colors, fmtDate, teamColour, ui } from '~/lib/ui'
 
 const TEAM = graphql(`
     query Team($slug: String!) {
@@ -60,17 +61,13 @@ export default function TeamScreen() {
     const year = picked ?? years[0]
     const charts = useQuery(CHARTS, { variables: { slug, year: year! }, skip: year == null })
 
-    if (loading) return <ActivityIndicator style={ui.center} />
-    if (!data?.team)
-        return (
-            <View style={ui.center}>
-                <Text style={ui.error}>Team not found.</Text>
-            </View>
-        )
+    if (loading) return <Loading fill />
+    if (!data?.team) return <Empty message="Team not found." fill />
 
     return (
         <View style={ui.screen}>
             <Stack.Screen options={{ title: data.team.name }} />
+            <View style={{ height: 3, backgroundColor: teamColour(slug) }} />
             <View style={ui.content}>
                 <SubscribeToggle teamSlug={slug} />
                 {year ? (
@@ -99,13 +96,13 @@ export default function TeamScreen() {
                 </ScrollView>
             </View>
             {charts.loading ? (
-                <ActivityIndicator />
+                <Loading />
             ) : (
                 <FlatList
                     data={charts.data?.depthChartLists.flatMap((l) => l.charts)}
                     keyExtractor={(c) => String(c.id)}
                     ListHeaderComponent={<Staff staff={charts.data?.team?.coachingStaff ?? []} />}
-                    ListEmptyComponent={<Text style={[ui.muted, ui.content]}>No charts yet.</Text>}
+                    ListEmptyComponent={<Empty message="No charts yet." />}
                     renderItem={({ item }) => (
                         <View>
                             <Pressable

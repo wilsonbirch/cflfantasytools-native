@@ -7,7 +7,7 @@ const row = (player: string, over: Partial<Record<string, number | string>>) => 
     __typename: 'PlayerSeasonStats',
     player,
     games: 3,
-    team: { __typename: 'Team', id: 1, abbreviation: 'OTT' },
+    team: { __typename: 'Team', id: 1, slug: 'ottawa-redblacks', abbreviation: 'OTT' },
     passAttempts: 0,
     completions: 0,
     passingYards: 0,
