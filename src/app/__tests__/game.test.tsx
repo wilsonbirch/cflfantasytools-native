@@ -49,6 +49,7 @@ const game = {
             __typename: 'PlayerGameStats',
             ...zero,
             player: '#12 D.Adams',
+            alignment: null,
             team: team(1, 'OTT'),
             passAttempts: 30,
             completions: 20,
@@ -61,6 +62,7 @@ const game = {
             __typename: 'PlayerGameStats',
             ...zero,
             player: '#81 J.Hardy',
+            alignment: '2WK',
             team: team(1, 'OTT'),
             targets: 8,
             receptions: 6,
@@ -87,6 +89,7 @@ it('renders the box score and per-player tables', async () => {
     expect(await screen.findByText('TOR 17 @ OTT 24')).toBeTruthy()
     expect(screen.getByText('20/30')).toBeTruthy() // passing C/A
     expect(screen.getByText('90')).toBeTruthy() // receiving yards
+    expect(screen.getByText('2WK')).toBeTruthy() // receiver alignment
     // Zone split for the receiver: DL=3, SM=5; receptions = isComplete, no separate subtype
     expect(screen.getByLabelText('Targets by zone')).toHaveTextContent(
         /#81 J.Hardy\s*3\s*0\s*0\s*0\s*5\s*0/,

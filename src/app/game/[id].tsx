@@ -37,6 +37,7 @@ const GAME = graphql(`
             }
             playerStats {
                 player
+                alignment
                 team {
                     id
                     abbreviation
@@ -66,9 +67,9 @@ const GAME = graphql(`
 
 type Stats = NonNullable<GameQuery['game']>['playerStats'][number]
 
-// Deep/short × left/middle/right, the api's target zones. These are field
-// zones, not receiver alignments: the contract carries no alignment per
-// target, so the 1S/2WK vocabulary has nowhere to attach yet.
+// Deep/short × left/middle/right, the api's target zones — field zones, not
+// receiver alignments. Alignment (1S, 2WK, …: outside-in, S = strong/field
+// side, WK = weak/boundary) is the Pos column on the receiving table.
 const ZONES = ['DEEP', 'SHORT'].flatMap((d) =>
     ['LEFT', 'MIDDLE', 'RIGHT'].map((dir) => ({ d, dir, label: `${d[0]}${dir[0]}` })),
 )
@@ -104,9 +105,10 @@ export function TeamTables({ abbr, stats }: { abbr: string; stats: Stats[] }) {
             />
             <Table
                 title="Receiving"
-                head={['Player', 'Tgt', 'Rec', 'Yds', 'TD']}
+                head={['Player', 'Pos', 'Tgt', 'Rec', 'Yds', 'TD']}
                 rows={receivers.map((s) => [
                     s.player,
+                    s.alignment,
                     s.targets,
                     s.receptions,
                     s.receivingYards,

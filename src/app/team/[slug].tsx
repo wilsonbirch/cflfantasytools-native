@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react'
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Link, Stack, useLocalSearchParams } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native'
@@ -73,6 +73,16 @@ export default function TeamScreen() {
             <Stack.Screen options={{ title: data.team.name }} />
             <View style={ui.content}>
                 <SubscribeToggle teamSlug={slug} />
+                {year ? (
+                    <Link
+                        href={`/alignment/${slug}?year=${year}`}
+                        style={ui.link}
+                        accessibilityRole="link"
+                        accessibilityLabel={`Receiver alignment ${year}`}
+                    >
+                        Receiver alignment {year} ›
+                    </Link>
+                ) : null}
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     {years.map((y) => (
                         <Pressable
