@@ -1,6 +1,8 @@
 import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
 import { Link } from 'expo-router'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import ScreenHeader from '~/components/ScreenHeader'
+import { Loading } from '~/components/State'
 import { graphql } from '~/generated'
 import { clearTokens, getRefreshToken } from '~/lib/tokenStore'
 import { ui } from '~/lib/ui'
@@ -35,10 +37,11 @@ export default function Account() {
         await client.resetStore()
     }
 
-    if (loading) return <ActivityIndicator style={ui.center} />
+    if (loading) return <Loading fill />
 
     return (
         <View style={ui.screen}>
+            <ScreenHeader title="Account" context={data?.me ? 'Signed in' : 'Signed out'} />
             {data?.me ? (
                 <View style={ui.content}>
                     <Text style={ui.title}>{data.me.email}</Text>

@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router/js-tabs'
 import { colors } from '~/lib/ui'
 
-// Text-only tabs: the app ships no icon font, and four short labels read fine.
+// Text-only tabs: the app ships no icon font, and five short labels read fine.
+// Each tab draws its own ScreenHeader, so the native header is off.
 export default function TabsLayout() {
     return (
         <Tabs
             screenOptions={{
-                headerStyle: { backgroundColor: colors.bg },
-                headerTintColor: colors.text,
+                headerShown: false,
                 sceneStyle: { backgroundColor: colors.bg },
                 tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.border },
                 tabBarActiveTintColor: colors.accent,
@@ -19,6 +19,7 @@ export default function TabsLayout() {
             <Tabs.Screen name="index" options={{ title: 'Teams' }} />
             <Tabs.Screen name="games" options={{ title: 'Games' }} />
             <Tabs.Screen name="stats" options={{ title: 'Stats' }} />
+            <Tabs.Screen name="fantasy" options={{ title: 'Fantasy' }} />
             <Tabs.Screen name="account" options={{ title: 'Account' }} />
         </Tabs>
     )

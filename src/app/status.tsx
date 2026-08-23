@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client/react'
-import { ActivityIndicator, FlatList, Text, View } from 'react-native'
+import { FlatList, Text, View } from 'react-native'
+import { ErrorState, Loading } from '~/components/State'
 import { graphql } from '~/generated'
 import { colors, ui } from '~/lib/ui'
 
@@ -20,14 +21,10 @@ const age = (m: number | null | undefined) =>
 
 // Freshness of the scheduled jobs — the same jobHealth web shows.
 export default function Status() {
-    const { data, loading, error } = useQuery(JOB_HEALTH, { fetchPolicy: 'network-only' })
-    if (loading) return <ActivityIndicator style={ui.center} />
+    const { data, loading, error, refetch } = useQuery(JOB_HEALTH, { fetchPolicy: 'network-only' })
+    if (loading) return <Loading fill />
     if (error)
-        return (
-            <View style={ui.center}>
-                <Text style={ui.error}>Could not reach the api.</Text>
-            </View>
-        )
+        return <ErrorState message="Could not reach the api." onRetry={() => refetch()} fill />
     return (
         <FlatList
             style={ui.screen}

@@ -1,10 +1,12 @@
 import { useQuery } from '@apollo/client/react'
 import { Stack, useLocalSearchParams } from 'expo-router'
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
+import { Empty, Loading } from '~/components/State'
+import StatTiles from '~/components/StatTiles'
 import Table from '~/components/Table'
 import { graphql } from '~/generated'
 import type { GameQuery } from '~/generated/graphql'
-import { fmtDate, ui } from '~/lib/ui'
+import { fmtDate, teamColour, ui } from '~/lib/ui'
 
 const GAME = graphql(`
     query Game($id: Int!) {
@@ -15,10 +17,12 @@ const GAME = graphql(`
             awayScore
             homeTeam {
                 id
+                slug
                 abbreviation
             }
             awayTeam {
                 id
+                slug
                 abbreviation
             }
             boxScore {
@@ -140,14 +144,9 @@ export function TeamTables({ abbr, stats }: { abbr: string; stats: Stats[] }) {
 export default function GameScreen() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const { data, loading } = useQuery(GAME, { variables: { id: Number(id) } })
-    if (loading) return <ActivityIndicator style={ui.center} />
+    if (loading) return <Loading fill />
     const game = data?.game
-    if (!game)
-        return (
-            <View style={ui.center}>
-                <Text style={ui.error}>Game not found.</Text>
-            </View>
-        )
+    if (!game) return <Empty message="Game not found." fill />
     const away = game.awayTeam?.abbreviation ?? '?'
     const home = game.homeTeam?.abbreviation ?? '?'
     // Box score columns follow the header: away first, then home.
@@ -159,12 +158,17 @@ export default function GameScreen() {
     return (
         <ScrollView style={ui.screen}>
             <Stack.Screen options={{ title: `${away} @ ${home}` }} />
-            <View style={ui.content}>
-                <Text style={ui.title}>
-                    {away} {game.awayScore ?? '–'} @ {home} {game.homeScore ?? '–'}
-                </Text>
-                <Text style={ui.muted}>{game.date ? fmtDate(game.date) : ''}</Text>
+            <View style={styles.bars}>
+                <View style={[styles.bar, { backgroundColor: teamColour(game.awayTeam?.slug) }]} />
+                <View style={[styles.bar, { backgroundColor: teamColour(game.homeTeam?.slug) }]} />
             </View>
+            <StatTiles
+                tiles={[
+                    { label: away, value: game.awayScore, hint: 'away' },
+                    { label: home, value: game.homeScore, hint: 'home' },
+                    { label: 'Date', value: game.date ? fmtDate(game.date) : '–' },
+                ]}
+            />
             <Table
                 title="Box score"
                 head={['', away, home]}
@@ -191,3 +195,8 @@ export default function GameScreen() {
         </ScrollView>
     )
 }
+
+const styles = {
+    bars: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 8 },
+    bar: { flex: 1, height: 3, borderRadius: 2 },
+} as const

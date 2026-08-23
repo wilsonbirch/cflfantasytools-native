@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client/react'
 import { Stack, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Empty, Loading } from '~/components/State'
 import { graphql } from '~/generated'
 import { colors, fmtDate, ui } from '~/lib/ui'
 
@@ -75,9 +76,9 @@ export default function AlignmentScreen() {
                 ))}
             </ScrollView>
             {loading ? (
-                <ActivityIndicator />
+                <Loading />
             ) : !ta ? (
-                <Text style={[ui.muted, ui.content]}>No parsed chart for this season yet.</Text>
+                <Empty message="No parsed chart for this season yet." />
             ) : (
                 <View>
                     <Text style={[ui.muted, ui.content]}>
