@@ -23,9 +23,7 @@ jest.mock('expo-router', () => ({ router: { replace: jest.fn() } }))
 const fetchMock = jest.fn()
 global.fetch = fetchMock as unknown as typeof fetch
 
-// Unsigned JWT with only an `exp` claim — all the client ever reads.
-const jwt = (expSeconds: number) =>
-    `h.${btoa(JSON.stringify({ exp: expSeconds })).replace(/=+$/, '')}.s`
+const inMinutes = (m: number) => new Date(Date.now() + m * 60_000).toISOString()
 
 const okResponse = (refresh: unknown) => ({ json: async () => ({ data: { refresh } }) })
 
@@ -37,18 +35,23 @@ beforeEach(async () => {
 })
 
 describe('storeSession', () => {
-    it('reads the access token expiry off the JWT and keeps it out of storage', async () => {
-        const token = jwt(Math.floor(Date.now() / 1000) + 900)
-        await storeSession({ accessToken: token, refreshToken: 'r1' })
+    it('keeps the access token in memory and out of storage', async () => {
+        const token = 'a1'
+        await storeSession({
+            accessToken: token,
+            accessTokenExpiresAt: inMinutes(15),
+            refreshToken: 'r1',
+        })
         expect(getAccessToken()).toBe(token)
         expect(accessTokenIsStale()).toBe(false)
         await expect(getRefreshToken()).resolves.toBe('r1')
         expect([...mockStore.values()]).not.toContain(token)
     })
 
-    it('treats an already-expired JWT as stale', async () => {
+    it('treats an already-expired access token as stale', async () => {
         await storeSession({
-            accessToken: jwt(Math.floor(Date.now() / 1000) - 10),
+            accessToken: 'a',
+            accessTokenExpiresAt: inMinutes(-1),
             refreshToken: 'r',
         })
         expect(accessTokenIsStale()).toBe(true)
@@ -64,8 +67,14 @@ describe('refreshSession', () => {
 
     it('shares one in-flight refresh between concurrent callers and rotates the token', async () => {
         await setRefreshToken('r1')
-        const token = jwt(Math.floor(Date.now() / 1000) + 900)
-        fetchMock.mockResolvedValue(okResponse({ accessToken: token, refreshToken: 'r2' }))
+        const token = 'a2'
+        fetchMock.mockResolvedValue(
+            okResponse({
+                accessToken: token,
+                accessTokenExpiresAt: inMinutes(15),
+                refreshToken: 'r2',
+            }),
+        )
         const results = await Promise.all([refreshSession(), refreshSession(), refreshSession()])
         expect(results).toEqual([true, true, true])
         expect(fetchMock).toHaveBeenCalledTimes(1)

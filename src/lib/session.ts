@@ -16,28 +16,18 @@ const REFRESH = graphql(`
     mutation Refresh($refreshToken: String!) {
         refresh(refreshToken: $refreshToken) {
             accessToken
+            accessTokenExpiresAt
             refreshToken
         }
     }
 `)
 
-// The api does not return an expiry; the access token is an HS256 JWT, so read
-// `exp` off it. Fall back to the api's 15-minute TTL if the shape ever changes.
-function accessTokenExpiry(token: string): number {
-    try {
-        const [, payload] = token.split('.')
-        const { exp } = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
-        return typeof exp === 'number' ? exp * 1000 : Date.now() + 15 * 60_000
-    } catch {
-        return Date.now() + 15 * 60_000
-    }
-}
-
 export async function storeSession(auth: {
     accessToken: string
+    accessTokenExpiresAt: string
     refreshToken: string
 }): Promise<void> {
-    setAccessToken(auth.accessToken, accessTokenExpiry(auth.accessToken))
+    setAccessToken(auth.accessToken, Date.parse(auth.accessTokenExpiresAt))
     await setRefreshToken(auth.refreshToken)
 }
 

@@ -1,13 +1,13 @@
 import { MockedProvider } from '@apollo/client/testing/react'
 import { render, screen } from '@testing-library/react-native'
 import Games from '../(tabs)/games'
-import { GamesDocument, TeamsDocument } from '~/generated/graphql'
-import { CURRENT_YEAR } from '~/components/SeasonFilter'
+import { GamesDocument, SeasonsDocument, TeamsDocument } from '~/generated/graphql'
 
 const mocks = [
     { request: { query: TeamsDocument }, result: { data: { teams: [] } } },
+    { request: { query: SeasonsDocument }, result: { data: { seasons: [2026, 2025] } } },
     {
-        request: { query: GamesDocument, variables: { year: CURRENT_YEAR, teamSlug: null } },
+        request: { query: GamesDocument, variables: { year: 2026, teamSlug: null } },
         result: {
             data: {
                 games: [
