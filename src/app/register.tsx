@@ -10,6 +10,7 @@ const REGISTER = graphql(`
     mutation Register($email: String!, $password: String!) {
         register(email: $email, password: $password) {
             accessToken
+            accessTokenExpiresAt
             refreshToken
         }
     }

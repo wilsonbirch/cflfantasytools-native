@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
-import SeasonFilter, { CURRENT_YEAR } from '~/components/SeasonFilter'
+import SeasonFilter, { useSeasons } from '~/components/SeasonFilter'
 import Table from '~/components/Table'
 import { graphql } from '~/generated'
 import type { PlayerSeasonStatsQuery } from '~/generated/graphql'
@@ -78,10 +78,15 @@ export const CATEGORIES = {
 type Category = keyof typeof CATEGORIES
 
 export default function Stats() {
-    const [year, setYear] = useState(CURRENT_YEAR)
+    const seasons = useSeasons()
+    const [picked, setYear] = useState<number>()
+    const year = picked ?? seasons[0]
     const [teamSlug, setTeamSlug] = useState<string | null>(null)
     const [category, setCategory] = useState<Category>('Receiving')
-    const { data, loading, error } = useQuery(SEASON, { variables: { year, teamSlug } })
+    const { data, loading, error } = useQuery(SEASON, {
+        variables: { year: year ?? 0, teamSlug },
+        skip: year === undefined,
+    })
     const cat = CATEGORIES[category]
     const rows = [...(data?.playerSeasonStats ?? [])]
         .filter(cat.has)
@@ -91,6 +96,7 @@ export default function Stats() {
         <ScrollView style={ui.screen} stickyHeaderIndices={[0]}>
             <View style={{ backgroundColor: colors.bg }}>
                 <SeasonFilter
+                    seasons={seasons}
                     year={year}
                     onYear={setYear}
                     teamSlug={teamSlug}
@@ -110,7 +116,7 @@ export default function Stats() {
                     ))}
                 </View>
             </View>
-            {loading ? (
+            {loading || year === undefined ? (
                 <ActivityIndicator />
             ) : error ? (
                 <Text style={[ui.error, ui.content]}>Could not load stats.</Text>

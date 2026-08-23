@@ -1,45 +1,61 @@
 import { useQuery } from '@apollo/client/react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { graphql } from '~/generated'
 import { TeamsDocument } from '~/generated/graphql'
 import { colors, ui } from '~/lib/ui'
 
-export const CURRENT_YEAR = new Date().getFullYear()
+const SEASONS = graphql(`
+    query Seasons {
+        seasons
+    }
+`)
 
-// Season stepper plus a club filter. The contract has no "seasons with games"
-// query, so the stepper is open-ended; an empty season just lists nothing.
+// Seasons the api has data for, newest first. Screens default to the first.
+export function useSeasons(): number[] {
+    const { data } = useQuery(SEASONS)
+    return data?.seasons ?? []
+}
+
+// Season stepper over the api's seasons plus a club filter.
 export default function SeasonFilter({
+    seasons,
     year,
     onYear,
     teamSlug,
     onTeam,
 }: {
-    year: number
+    seasons: number[]
+    year: number | undefined
     onYear: (y: number) => void
     teamSlug: string | null
     onTeam: (slug: string | null) => void
 }) {
     const { data } = useQuery(TeamsDocument)
     const teams = data?.teams.filter((t) => t.isActive) ?? []
+    const i = year === undefined ? -1 : seasons.indexOf(year)
+    const older = i >= 0 ? seasons[i + 1] : undefined
+    const newer = i > 0 ? seasons[i - 1] : undefined
     return (
         <View style={styles.wrap}>
             <View style={styles.years}>
                 <Pressable
-                    onPress={() => onYear(year - 1)}
+                    onPress={() => older !== undefined && onYear(older)}
+                    disabled={older === undefined}
                     accessibilityRole="button"
                     accessibilityLabel="Previous season"
                     hitSlop={8}
                 >
-                    <Text style={ui.link}>‹</Text>
+                    <Text style={[ui.link, older === undefined && styles.off]}>‹</Text>
                 </Pressable>
-                <Text style={ui.title}>{year}</Text>
+                <Text style={ui.title}>{year ?? '—'}</Text>
                 <Pressable
-                    onPress={() => onYear(year + 1)}
-                    disabled={year >= CURRENT_YEAR}
+                    onPress={() => newer !== undefined && onYear(newer)}
+                    disabled={newer === undefined}
                     accessibilityRole="button"
                     accessibilityLabel="Next season"
                     hitSlop={8}
                 >
-                    <Text style={[ui.link, year >= CURRENT_YEAR && styles.off]}>›</Text>
+                    <Text style={[ui.link, newer === undefined && styles.off]}>›</Text>
                 </Pressable>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>

@@ -1,8 +1,7 @@
 import { MockedProvider } from '@apollo/client/testing/react'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import Stats from '../(tabs)/stats'
-import { PlayerSeasonStatsDocument, TeamsDocument } from '~/generated/graphql'
-import { CURRENT_YEAR } from '~/components/SeasonFilter'
+import { PlayerSeasonStatsDocument, SeasonsDocument, TeamsDocument } from '~/generated/graphql'
 
 const row = (player: string, over: Partial<Record<string, number>>) => ({
     __typename: 'PlayerSeasonStats',
@@ -27,10 +26,11 @@ const row = (player: string, over: Partial<Record<string, number>>) => ({
 
 const mocks = [
     { request: { query: TeamsDocument }, result: { data: { teams: [] } } },
+    { request: { query: SeasonsDocument }, result: { data: { seasons: [2026, 2025] } } },
     {
         request: {
             query: PlayerSeasonStatsDocument,
-            variables: { year: CURRENT_YEAR, teamSlug: null },
+            variables: { year: 2026, teamSlug: null },
         },
         result: {
             data: {
