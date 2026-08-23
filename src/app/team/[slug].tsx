@@ -29,6 +29,12 @@ const CHARTS = graphql(`
                 season
                 publishedAt
                 url
+                files {
+                    id
+                    fetchedAt
+                    size
+                    url
+                }
             }
         }
     }
@@ -79,20 +85,37 @@ export default function TeamScreen() {
                     keyExtractor={(c) => String(c.id)}
                     ListEmptyComponent={<Text style={[ui.muted, ui.content]}>No charts yet.</Text>}
                     renderItem={({ item }) => (
-                        <Pressable
-                            style={ui.row}
-                            onPress={() => WebBrowser.openBrowserAsync(item.url)}
-                            accessibilityRole="link"
-                            accessibilityLabel={`Open ${item.title}`}
-                        >
-                            <View>
-                                <Text style={ui.text}>{item.title}</Text>
-                                <Text style={ui.muted}>
-                                    {item.season} week {item.week}
-                                </Text>
-                            </View>
-                            <Text style={ui.muted}>{fmtDate(item.publishedAt)}</Text>
-                        </Pressable>
+                        <View>
+                            <Pressable
+                                style={ui.row}
+                                onPress={() => WebBrowser.openBrowserAsync(item.url)}
+                                accessibilityRole="link"
+                                accessibilityLabel={`Open ${item.title}`}
+                            >
+                                <View>
+                                    <Text style={ui.text}>{item.title}</Text>
+                                    <Text style={ui.muted}>
+                                        {item.season} week {item.week}
+                                        {/* >1 archived copy means the club replaced the PDF
+                                            at the same URL — the change href-diffing misses. */}
+                                        {item.files.length > 1 ? ' · replaced at same URL' : ''}
+                                    </Text>
+                                </View>
+                                <Text style={ui.muted}>{fmtDate(item.publishedAt)}</Text>
+                            </Pressable>
+                            {item.files.map((f) => (
+                                <Pressable
+                                    key={f.id}
+                                    style={[ui.row, styles.file]}
+                                    onPress={() => WebBrowser.openBrowserAsync(f.url)}
+                                    accessibilityRole="link"
+                                    accessibilityLabel={`Open archived copy from ${fmtDate(f.fetchedAt)}`}
+                                >
+                                    <Text style={ui.muted}>Archived {fmtDate(f.fetchedAt)}</Text>
+                                    <Text style={ui.muted}>{Math.round(f.size / 1024)} KB</Text>
+                                </Pressable>
+                            ))}
+                        </View>
                     )}
                 />
             )}
@@ -109,4 +132,5 @@ const styles = {
         marginRight: 8,
     },
     chipOn: { backgroundColor: colors.accent },
+    file: { paddingLeft: 32, paddingVertical: 8 },
 } as const
