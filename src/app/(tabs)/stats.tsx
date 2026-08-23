@@ -28,6 +28,7 @@ const SEASON = graphql(`
             receptions
             receivingYards
             receivingTouchdowns
+            primaryAlignment
             epa
         }
     }
@@ -57,10 +58,12 @@ export const CATEGORIES = {
         row: (r: Row) => [r.games, r.rushAttempts, r.rushingYards, r.rushingTouchdowns],
     },
     Receiving: {
-        head: ['Player', 'G', 'Tgt', 'Rec', 'Yds', 'TD'],
+        // Pos = most common receiver alignment on the season's parsed charts.
+        head: ['Player', 'Pos', 'G', 'Tgt', 'Rec', 'Yds', 'TD'],
         key: (r: Row) => r.receivingYards,
         has: (r: Row) => r.targets > 0,
         row: (r: Row) => [
+            r.primaryAlignment,
             r.games,
             r.targets,
             r.receptions,

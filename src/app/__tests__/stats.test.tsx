@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import Stats from '../(tabs)/stats'
 import { PlayerSeasonStatsDocument, SeasonsDocument, TeamsDocument } from '~/generated/graphql'
 
-const row = (player: string, over: Partial<Record<string, number>>) => ({
+const row = (player: string, over: Partial<Record<string, number | string>>) => ({
     __typename: 'PlayerSeasonStats',
     player,
     games: 3,
@@ -20,6 +20,7 @@ const row = (player: string, over: Partial<Record<string, number>>) => ({
     receptions: 0,
     receivingYards: 0,
     receivingTouchdowns: 0,
+    primaryAlignment: null,
     epa: 0,
     ...over,
 })
@@ -41,7 +42,13 @@ const mocks = [
                         passingYards: 500,
                         epa: 9,
                     }),
-                    row('#81 J.Hardy', { targets: 10, receptions: 7, receivingYards: 120, epa: 4 }),
+                    row('#81 J.Hardy', {
+                        targets: 10,
+                        receptions: 7,
+                        receivingYards: 120,
+                        primaryAlignment: '1S',
+                        epa: 4,
+                    }),
                     row('#7 W.Powell', { rushAttempts: 20, rushingYards: 110, epa: 1 }),
                 ],
             },
@@ -56,6 +63,7 @@ it('shows receiving leaders by default and switches category', async () => {
         </MockedProvider>,
     )
     expect(await screen.findByText('#81 J.Hardy (OTT)')).toBeTruthy()
+    expect(screen.getByText('1S')).toBeTruthy()
     expect(screen.queryByText('#12 D.Adams (OTT)')).toBeNull()
 
     const tab = screen.getByLabelText('Passing leaders')
