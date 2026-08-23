@@ -5,6 +5,9 @@
 module.exports = {
     preset: 'jest-expo',
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+    // The first render in a file pays react-native's lazy module loading, which
+    // on CI runners can eat most of jest's 5s default.
+    testTimeout: 20000,
     moduleNameMapper: {
         // Metro understands CSS; Jest does not. Stub it (side-effect-only imports).
         '\\.css$': '<rootDir>/jest/style-mock.js',
