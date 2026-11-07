@@ -60,6 +60,9 @@ export default function TeamScreen() {
     const years = data?.depthChartYears ?? []
     const year = picked ?? years[0]
     const charts = useQuery(CHARTS, year == null ? skipToken : { variables: { slug, year } })
+    // skipToken keeps the last result after a query has run (e.g. another team's
+    // charts after a slug change); read nothing while skipped.
+    const chartData = year == null ? undefined : charts.data
 
     if (loading) return <Loading fill />
     if (!data?.team) return <Empty message="Team not found." fill />
@@ -99,9 +102,9 @@ export default function TeamScreen() {
                 <Loading />
             ) : (
                 <FlatList
-                    data={charts.data?.depthChartLists.flatMap((l) => l.charts)}
+                    data={chartData?.depthChartLists.flatMap((l) => l.charts)}
                     keyExtractor={(c) => String(c.id)}
-                    ListHeaderComponent={<Staff staff={charts.data?.team?.coachingStaff ?? []} />}
+                    ListHeaderComponent={<Staff staff={chartData?.team?.coachingStaff ?? []} />}
                     ListEmptyComponent={<Empty message="No charts yet." />}
                     renderItem={({ item }) => (
                         <View>

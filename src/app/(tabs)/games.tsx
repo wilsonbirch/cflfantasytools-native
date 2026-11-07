@@ -39,7 +39,8 @@ export default function Games() {
         year === undefined ? skipToken : { variables: { year, teamSlug } },
     )
 
-    const games = data?.games ?? []
+    // skipToken keeps the last result after a query has run; read nothing while skipped.
+    const games = year === undefined ? [] : (data?.games ?? [])
     return (
         <FlatList
             style={ui.screen}

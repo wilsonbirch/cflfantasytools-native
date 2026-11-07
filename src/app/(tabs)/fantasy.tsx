@@ -77,8 +77,10 @@ export default function Fantasy() {
     const [pickedGw, setGw] = useState<number>()
     const [sort, setSort] = useState<Sort>(null)
 
+    // skipToken keeps a query's last result after it has run, so nothing is read
+    // from GAMEWEEKS or PLAYERS while it is skipped: no stale season or gameweek.
     const gws = useQuery(GAMEWEEKS, year === undefined ? skipToken : { variables: { year } })
-    const gameweeks = gws.data?.gameweeks ?? []
+    const gameweeks = year === undefined ? [] : (gws.data?.gameweeks ?? [])
     // The api's own default: the first gameweek not yet complete, else the last.
     const gw =
         gameweeks.find((g) => g.id === pickedGw) ??
@@ -88,8 +90,9 @@ export default function Fantasy() {
         PLAYERS,
         gw === undefined ? skipToken : { variables: { gameweekId: gw.id, teamSlug, position } },
     )
+    const players = gw === undefined ? [] : (data?.fantasyPlayers ?? [])
     const rows = sortRows(
-        (data?.fantasyPlayers ?? []).map((p) => ({
+        players.map((p) => ({
             id: p.id,
             slug: p.team?.slug,
             cells: [
@@ -193,7 +196,7 @@ export default function Fantasy() {
             ListEmptyComponent={
                 loading || gws.loading || year === undefined ? (
                     <Loading />
-                ) : error || gws.error ? (
+                ) : (gw !== undefined && error) || gws.error ? (
                     <ErrorState message="Could not load players." onRetry={() => refetch()} />
                 ) : (
                     <Empty message="No players for this gameweek." />

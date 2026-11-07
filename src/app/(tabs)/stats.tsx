@@ -94,10 +94,12 @@ export default function Stats() {
         SEASON,
         year === undefined ? skipToken : { variables: { year, teamSlug } },
     )
+    // skipToken keeps the last result after a query has run; read nothing while skipped.
+    const stats = year === undefined ? [] : (data?.playerSeasonStats ?? [])
     const cat = CATEGORIES[category]
     // Category order (yards / EPA) unless a column header was tapped.
     const rows = sortRows(
-        [...(data?.playerSeasonStats ?? [])]
+        [...stats]
             .filter(cat.has)
             .sort((a, b) => cat.key(b) - cat.key(a))
             .map((r) => ({

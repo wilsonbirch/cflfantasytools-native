@@ -1,3 +1,4 @@
+import { InMemoryCache } from '@apollo/client'
 import { MockedProvider } from '@apollo/client/testing/react'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import Stats from '../(tabs)/stats'
@@ -70,5 +71,22 @@ it('shows receiving leaders by default and switches category', async () => {
     await act(() => fireEvent.press(tab))
     expect(screen.getByText('#12 D.Adams (OTT)')).toBeTruthy()
     expect(screen.getByText('40/60')).toBeTruthy()
+    expect(screen.queryByText('#81 J.Hardy (OTT)')).toBeNull()
+})
+
+// SEASON goes from running to skipped when the seasons list empties (as it can
+// while the store resets on login/logout). skipToken keeps a query's last
+// result, so the screen must not keep showing the old season's leaders.
+it('drops the previous season leaders when the season becomes unknown', async () => {
+    const cache = new InMemoryCache()
+    await render(
+        <MockedProvider mocks={mocks} cache={cache}>
+            <Stats />
+        </MockedProvider>,
+    )
+    expect(await screen.findByText('#81 J.Hardy (OTT)')).toBeTruthy()
+
+    await act(() => cache.writeQuery({ query: SeasonsDocument, data: { seasons: [] } }))
+    expect(await screen.findByText('— season · Receiving leaders')).toBeTruthy()
     expect(screen.queryByText('#81 J.Hardy (OTT)')).toBeNull()
 })

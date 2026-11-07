@@ -36,10 +36,14 @@ const player = (id: number, name: string, salary: number, points: number) => ({
 
 const mocks = [
     { request: { query: TeamsDocument }, result: { data: { teams: [] } } },
-    { request: { query: SeasonsDocument }, result: { data: { seasons: [2026] } } },
+    { request: { query: SeasonsDocument }, result: { data: { seasons: [2026, 2025] } } },
     {
         request: { query: GameweeksDocument, variables: { year: 2026 } },
         result: { data: { gameweeks: [gw(1, 1, 'complete'), gw(2, 2, 'scheduled')] } },
+    },
+    {
+        request: { query: GameweeksDocument, variables: { year: 2025 } },
+        result: { data: { gameweeks: [] } },
     },
     {
         request: {
@@ -75,4 +79,24 @@ it('defaults to the first incomplete gameweek, sorts by header and opens a playe
         pathname: '/fantasy/[id]',
         params: { id: '7', gw: '2' },
     })
+})
+
+// PLAYERS goes from running to skipped: gw is undefined while 2025's gameweeks
+// load, and stays undefined because 2025 has none. skipToken keeps a query's
+// last result, so the screen must not show 2026's rows under 2025.
+it('clears the previous season players when switching to a season without gameweeks', async () => {
+    await render(
+        <MockedProvider mocks={mocks}>
+            <Fantasy />
+        </MockedProvider>,
+    )
+    expect(await screen.findByText('J. Hardy · WR OTT')).toBeTruthy()
+
+    await act(() => fireEvent.press(screen.getByLabelText('Previous season')))
+    // While 2025's gameweeks load.
+    expect(screen.queryByText('J. Hardy · WR OTT')).toBeNull()
+
+    expect(await screen.findByText('2025 · no gameweeks yet')).toBeTruthy()
+    expect(screen.queryByText('J. Hardy · WR OTT')).toBeNull()
+    expect(screen.queryByLabelText('Sort by Val')).toBeNull()
 })
