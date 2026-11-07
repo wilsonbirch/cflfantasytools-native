@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { skipToken, useQuery } from '@apollo/client/react'
 import { useState } from 'react'
 import { Pressable, SectionList, Text, View } from 'react-native'
 import ScreenHeader from '~/components/ScreenHeader'
@@ -90,10 +90,10 @@ export default function Stats() {
     const [teamSlug, setTeamSlug] = useState<string | null>(null)
     const [category, setCategory] = useState<Category>('Receiving')
     const [sort, setSort] = useState<Sort>(null)
-    const { data, loading, error, refetch } = useQuery(SEASON, {
-        variables: { year: year ?? 0, teamSlug },
-        skip: year === undefined,
-    })
+    const { data, loading, error, refetch } = useQuery(
+        SEASON,
+        year === undefined ? skipToken : { variables: { year, teamSlug } },
+    )
     const cat = CATEGORIES[category]
     // Category order (yards / EPA) unless a column header was tapped.
     const rows = sortRows(

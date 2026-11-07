@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { skipToken, useQuery } from '@apollo/client/react'
 import { Link, Stack, useLocalSearchParams } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { useState } from 'react'
@@ -59,7 +59,7 @@ export default function TeamScreen() {
     const [picked, setPicked] = useState<number>()
     const years = data?.depthChartYears ?? []
     const year = picked ?? years[0]
-    const charts = useQuery(CHARTS, { variables: { slug, year: year! }, skip: year == null })
+    const charts = useQuery(CHARTS, year == null ? skipToken : { variables: { slug, year } })
 
     if (loading) return <Loading fill />
     if (!data?.team) return <Empty message="Team not found." fill />

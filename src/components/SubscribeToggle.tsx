@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client/react'
+import { skipToken, useMutation, useQuery } from '@apollo/client/react'
 import { Link } from 'expo-router'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { graphql } from '~/generated'
@@ -41,7 +41,7 @@ const UNSUBSCRIBE = graphql(`
 export default function SubscribeToggle({ teamSlug }: { teamSlug: string }) {
     const { data: meData } = useQuery(MeDocument)
     const signedIn = !!meData?.me
-    const { data } = useQuery(MY_SUBSCRIPTIONS, { skip: !signedIn })
+    const { data } = useQuery(MY_SUBSCRIPTIONS, signedIn ? {} : skipToken)
     const refetch = { refetchQueries: [MY_SUBSCRIPTIONS] }
     const [subscribe, { loading: subscribing }] = useMutation(SUBSCRIBE, refetch)
     const [unsubscribe, { loading: unsubscribing }] = useMutation(UNSUBSCRIBE, refetch)

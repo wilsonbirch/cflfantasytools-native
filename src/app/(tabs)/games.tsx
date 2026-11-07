@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { skipToken, useQuery } from '@apollo/client/react'
 import { Link } from 'expo-router'
 import { useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
@@ -34,10 +34,10 @@ export default function Games() {
     const [picked, setYear] = useState<number>()
     const year = picked ?? seasons[0]
     const [teamSlug, setTeamSlug] = useState<string | null>(null)
-    const { data, loading, error, refetch } = useQuery(GAMES, {
-        variables: { year: year ?? 0, teamSlug },
-        skip: year === undefined,
-    })
+    const { data, loading, error, refetch } = useQuery(
+        GAMES,
+        year === undefined ? skipToken : { variables: { year, teamSlug } },
+    )
 
     const games = data?.games ?? []
     return (
