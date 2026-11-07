@@ -3,13 +3,18 @@ import { render, screen, within } from '@testing-library/react-native'
 import TeamScreen from '../team/[slug]'
 import { DepthChartListsDocument, MeDocument, TeamDocument } from '~/generated/graphql'
 
+let mockSlug = 'ott'
+beforeEach(() => {
+    mockSlug = 'ott'
+})
+
 jest.mock('expo-router', () => ({
     Link: ({ children }: { children: React.ReactNode }) => {
         const { Text } = jest.requireActual('react-native')
         return <Text>{children}</Text>
     },
     Stack: { Screen: () => null },
-    useLocalSearchParams: () => ({ slug: 'ott' }),
+    useLocalSearchParams: () => ({ slug: mockSlug }),
 }))
 
 const file = (id: number, fetchedAt: string, size: number) => ({
@@ -28,6 +33,15 @@ const mocks = [
             data: {
                 team: { __typename: 'Team', id: 1, name: 'Ottawa Redblacks' },
                 depthChartYears: [2026],
+            },
+        },
+    },
+    {
+        request: { query: TeamDocument, variables: { slug: 'tor' } },
+        result: {
+            data: {
+                team: { __typename: 'Team', id: 2, name: 'Toronto Argonauts' },
+                depthChartYears: [],
             },
         },
     },
@@ -109,4 +123,24 @@ it('lists the season coaching staff HC first', async () => {
         'HC B. Dickenson',
         'OC T. Dinwiddie',
     ])
+})
+
+// CHARTS goes from running to skipped when the same mounted screen gets a new
+// slug whose team has no depth-chart years. skipToken keeps a query's last
+// result, so Toronto must not show Ottawa's charts and staff.
+it("does not show the previous team's charts after a slug change", async () => {
+    // A fresh element each time, so the rerender reaches TeamScreen.
+    const ui = () => (
+        <MockedProvider mocks={mocks}>
+            <TeamScreen />
+        </MockedProvider>
+    )
+    await render(ui())
+    expect(await screen.findByLabelText('Open Week 3 vs TOR', {}, { timeout: 5000 })).toBeTruthy()
+
+    mockSlug = 'tor'
+    await screen.rerender(ui())
+    expect(await screen.findByText('No charts yet.', {}, { timeout: 5000 })).toBeTruthy()
+    expect(screen.queryByLabelText('Open Week 3 vs TOR')).toBeNull()
+    expect(screen.queryByLabelText('Coaching staff')).toBeNull()
 })

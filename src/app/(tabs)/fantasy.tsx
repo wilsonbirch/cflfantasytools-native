@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { skipToken, useQuery } from '@apollo/client/react'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, ScrollView, SectionList, Text, View } from 'react-native'
@@ -77,19 +77,22 @@ export default function Fantasy() {
     const [pickedGw, setGw] = useState<number>()
     const [sort, setSort] = useState<Sort>(null)
 
-    const gws = useQuery(GAMEWEEKS, { variables: { year: year ?? 0 }, skip: year === undefined })
-    const gameweeks = gws.data?.gameweeks ?? []
+    // skipToken keeps a query's last result after it has run, so nothing is read
+    // from GAMEWEEKS or PLAYERS while it is skipped: no stale season or gameweek.
+    const gws = useQuery(GAMEWEEKS, year === undefined ? skipToken : { variables: { year } })
+    const gameweeks = year === undefined ? [] : (gws.data?.gameweeks ?? [])
     // The api's own default: the first gameweek not yet complete, else the last.
     const gw =
         gameweeks.find((g) => g.id === pickedGw) ??
         gameweeks.find((g) => g.status !== 'complete') ??
         gameweeks.at(-1)
-    const { data, loading, error, refetch } = useQuery(PLAYERS, {
-        variables: { gameweekId: gw?.id, teamSlug, position },
-        skip: gw === undefined,
-    })
+    const { data, loading, error, refetch } = useQuery(
+        PLAYERS,
+        gw === undefined ? skipToken : { variables: { gameweekId: gw.id, teamSlug, position } },
+    )
+    const players = gw === undefined ? [] : (data?.fantasyPlayers ?? [])
     const rows = sortRows(
-        (data?.fantasyPlayers ?? []).map((p) => ({
+        players.map((p) => ({
             id: p.id,
             slug: p.team?.slug,
             cells: [
@@ -193,7 +196,7 @@ export default function Fantasy() {
             ListEmptyComponent={
                 loading || gws.loading || year === undefined ? (
                     <Loading />
-                ) : error || gws.error ? (
+                ) : (gw !== undefined && error) || gws.error ? (
                     <ErrorState message="Could not load players." onRetry={() => refetch()} />
                 ) : (
                     <Empty message="No players for this gameweek." />

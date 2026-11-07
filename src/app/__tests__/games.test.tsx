@@ -1,5 +1,6 @@
+import { InMemoryCache } from '@apollo/client'
 import { MockedProvider } from '@apollo/client/testing/react'
-import { render, screen } from '@testing-library/react-native'
+import { act, render, screen } from '@testing-library/react-native'
 import Games from '../(tabs)/games'
 import { GamesDocument, SeasonsDocument, TeamsDocument } from '~/generated/graphql'
 
@@ -43,4 +44,21 @@ it('lists the season games with scores', async () => {
         </MockedProvider>,
     )
     expect(await screen.findByLabelText('TOR at OTT, 17 to 24')).toBeTruthy()
+})
+
+// GAMES goes from running to skipped when the seasons list empties (as it can
+// while the store resets on login/logout). skipToken keeps a query's last
+// result, so the screen must not keep listing the old season's games.
+it('drops the previous season games when the season becomes unknown', async () => {
+    const cache = new InMemoryCache()
+    await render(
+        <MockedProvider mocks={mocks} cache={cache}>
+            <Games />
+        </MockedProvider>,
+    )
+    expect(await screen.findByLabelText('TOR at OTT, 17 to 24')).toBeTruthy()
+
+    await act(() => cache.writeQuery({ query: SeasonsDocument, data: { seasons: [] } }))
+    expect(await screen.findByText('— season · 0 parsed')).toBeTruthy()
+    expect(screen.queryByLabelText('TOR at OTT, 17 to 24')).toBeNull()
 })
