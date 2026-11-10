@@ -45,8 +45,8 @@
         "react-native-worklets": "0.10.1"
     },
     "devDependencies": {
-        "@graphql-codegen/cli": "^7.4.6",
-        "@graphql-codegen/client-preset": "^6.2.3",
+        "@graphql-codegen/cli": "^8.0.0",
+        "@graphql-codegen/client-preset": "^7.0.0",
         "@testing-library/react-native": "^14.1.0",
         "@types/jest": "29.5.14",
         "@types/react": "~19.2.2",
